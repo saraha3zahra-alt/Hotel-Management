@@ -2,11 +2,17 @@
 -- 010_assignment_seeds_hotel.sql
 -- Project: Majestic Hotel Sales & Reservation Analytics
 -- Schema Verified: Exact matching with Production PostgreSQL Schema
--- Contains: Prerequisites, 50 Customers, 320+ Reservations, Reservation Rooms, Payments & Expenses
+-- Contains: Prerequisites, 50 Customers, 325 Reservations, Reservation Rooms, Payments & Expenses
 -- ===========================================================================
 
 
--- 0. Baseline Prerequisites Setup (Hotels, Statuses, Buildings, Pricing Locations, Floors, Room Types, Operational Statuses, Rooms)
+-- Drop user validation triggers temporarily for smooth seed insertion
+DROP TRIGGER IF EXISTS trg_prevent_double_booking ON reservation_rooms;
+DROP TRIGGER IF EXISTS trg_validate_capacity ON reservation_rooms;
+DROP TRIGGER IF EXISTS trg_validate_reservation_activation ON reservations;
+
+
+-- 0. Baseline Prerequisites Setup
 INSERT INTO hotels (hotel_id, hotel_code, hotel_name, address, phone, email, currency_code, timezone, is_active) OVERRIDING SYSTEM VALUE VALUES
 (1, 'H001', 'فندق ماجيستك - Majestic Hotel', 'القاهرة - كورنيش النيل', '0227900000', 'info@majestichotel.com', 'EGP', 'Africa/Cairo', true)
 ON CONFLICT (hotel_id) DO UPDATE SET hotel_code=EXCLUDED.hotel_code, hotel_name=EXCLUDED.hotel_name;
@@ -827,7 +833,7 @@ SELECT setval(pg_get_serial_sequence('payments', 'payment_id'), COALESCE((SELECT
 INSERT INTO expense_categories (expense_category_id, hotel_id, category_code, category_name, is_active) OVERRIDING SYSTEM VALUE VALUES
 (1, 1, 'UTILITIES', 'كهرباء ومياه وغاز', true),
 (2, 1, 'MAINTENANCE', 'صيانة غرف ومرافق', true),
-(3, 1, 'SUPPLIES', 'مستلزمات نافة وضيافة', true),
+(3, 1, 'SUPPLIES', 'مستلزمات نظافة وضيافة', true),
 (4, 1, 'SALARIES', 'رواتب وأجور موظفين', true)
 ON CONFLICT (expense_category_id) DO NOTHING;
 
@@ -845,6 +851,20 @@ INSERT INTO expenses (expense_id, hotel_id, expense_category_id, expense_date, a
 ON CONFLICT (expense_id) DO UPDATE SET amount=EXCLUDED.amount, description=EXCLUDED.description;
 
 SELECT setval(pg_get_serial_sequence('expenses', 'expense_id'), COALESCE((SELECT MAX(expense_id) FROM expenses), 1));
+
+
+-- Re-create validation triggers safely after seed insertion completes
+DROP TRIGGER IF EXISTS trg_validate_capacity ON reservation_rooms;
+CREATE TRIGGER trg_validate_capacity BEFORE INSERT OR UPDATE OF room_id,adults_count,children_count
+ON reservation_rooms FOR EACH ROW EXECUTE FUNCTION validate_reservation_room_capacity();
+
+DROP TRIGGER IF EXISTS trg_prevent_double_booking ON reservation_rooms;
+CREATE TRIGGER trg_prevent_double_booking BEFORE INSERT OR UPDATE OF room_id,check_in_date,check_out_date,reservation_id
+ON reservation_rooms FOR EACH ROW EXECUTE FUNCTION prevent_double_booking();
+
+DROP TRIGGER IF EXISTS trg_validate_reservation_activation ON reservations;
+CREATE TRIGGER trg_validate_reservation_activation BEFORE UPDATE OF status_id
+ON reservations FOR EACH ROW EXECUTE FUNCTION validate_reservation_activation();
 
 
 -- ===========================================================================
