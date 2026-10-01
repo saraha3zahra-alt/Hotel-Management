@@ -2,7 +2,7 @@
 -- 010_assignment_seeds_hotel.sql
 -- Project: Majestic Hotel Sales & Reservation Analytics
 -- Schema Verified: Exact matching with Production PostgreSQL Schema & UI Screens
--- Contains: Hotels, Buildings, Floors, Pricing Locations, Pricing Periods, Age Categories, Guest Night Prices, Promotions & Tiers, Customers, Reservations, Payments & Expenses
+-- Contains: Hotels, Buildings, Floors, Pricing Locations, Pricing Periods, Age Categories, Guest Night Prices (Room-level), Promotions & Tiers, Customers, Reservations, Payments & Expenses
 -- ===========================================================================
 
 
@@ -83,20 +83,58 @@ ON CONFLICT (age_category_id) DO UPDATE SET category_code=EXCLUDED.category_code
 
 SELECT setval(pg_get_serial_sequence('age_categories', 'age_category_id'), COALESCE((SELECT MAX(age_category_id) FROM age_categories), 1));
 
--- 0.3 Guest Night Prices (جدول أسعار الغرف لكل فئة عمرية وفترة)
-INSERT INTO guest_night_prices (guest_night_price_id, pricing_period_id, building_id, pricing_location_id, room_type_id, age_category_id, price_per_person_per_night, currency_code) OVERRIDING SYSTEM VALUE VALUES
-(1, 1, 1, 1, 1, 3, 1500.00, 'EGP'),
-(2, 1, 1, 1, 2, 3, 2200.00, 'EGP'),
-(3, 1, 1, 1, 2, 2, 1100.00, 'EGP'),
-(4, 1, 1, 1, 3, 3, 3500.00, 'EGP'),
-(5, 1, 1, 1, 3, 2, 1750.00, 'EGP'),
-(6, 1, 1, 1, 4, 3, 5000.00, 'EGP'),
-(7, 1, 1, 1, 5, 3, 7500.00, 'EGP'),
-(8, 2, 1, 1, 1, 3, 1400.00, 'EGP'),
-(9, 2, 1, 1, 2, 3, 2000.00, 'EGP'),
-(10, 2, 1, 1, 3, 3, 3200.00, 'EGP'),
-(11, 2, 1, 1, 4, 3, 4500.00, 'EGP'),
-(12, 2, 1, 1, 5, 3, 7000.00, 'EGP')
+-- 0.3 Guest Night Prices (جدول أسعار الغرف المميز بكل غرفة - room_id is NOT NULL)
+INSERT INTO guest_night_prices (guest_night_price_id, pricing_period_id, building_id, pricing_location_id, room_type_id, age_category_id, price_per_person_per_night, currency_code, room_id) OVERRIDING SYSTEM VALUE VALUES
+(1, 1, 1, 1, 1, 3, 1500.00, 'EGP', 1),
+(2, 1, 1, 1, 1, 3, 1500.00, 'EGP', 2),
+(3, 1, 1, 1, 1, 3, 1500.00, 'EGP', 3),
+(4, 1, 1, 1, 1, 3, 1500.00, 'EGP', 4),
+(5, 1, 1, 1, 1, 3, 1500.00, 'EGP', 5),
+(6, 1, 1, 1, 2, 3, 2200.00, 'EGP', 6),
+(7, 1, 1, 1, 2, 3, 2200.00, 'EGP', 7),
+(8, 1, 1, 1, 2, 3, 2200.00, 'EGP', 8),
+(9, 1, 1, 1, 2, 3, 2200.00, 'EGP', 9),
+(10, 1, 1, 1, 2, 3, 2200.00, 'EGP', 10),
+(11, 1, 1, 1, 3, 3, 3500.00, 'EGP', 11),
+(12, 1, 1, 1, 3, 3, 3500.00, 'EGP', 12),
+(13, 1, 1, 1, 3, 3, 3500.00, 'EGP', 13),
+(14, 1, 1, 1, 3, 3, 3500.00, 'EGP', 14),
+(15, 1, 1, 1, 3, 3, 3500.00, 'EGP', 15),
+(16, 1, 1, 1, 4, 3, 5000.00, 'EGP', 16),
+(17, 1, 1, 1, 4, 3, 5000.00, 'EGP', 17),
+(18, 1, 1, 1, 4, 3, 5000.00, 'EGP', 18),
+(19, 1, 1, 1, 4, 3, 5000.00, 'EGP', 19),
+(20, 1, 1, 1, 4, 3, 5000.00, 'EGP', 20),
+(21, 1, 1, 1, 5, 3, 7500.00, 'EGP', 21),
+(22, 1, 1, 1, 5, 3, 7500.00, 'EGP', 22),
+(23, 1, 1, 1, 5, 3, 7500.00, 'EGP', 23),
+(24, 1, 1, 1, 5, 3, 7500.00, 'EGP', 24),
+(25, 1, 1, 1, 5, 3, 7500.00, 'EGP', 25),
+(26, 2, 1, 1, 1, 3, 1350.00, 'EGP', 1),
+(27, 2, 1, 1, 1, 3, 1350.00, 'EGP', 2),
+(28, 2, 1, 1, 1, 3, 1350.00, 'EGP', 3),
+(29, 2, 1, 1, 1, 3, 1350.00, 'EGP', 4),
+(30, 2, 1, 1, 1, 3, 1350.00, 'EGP', 5),
+(31, 2, 1, 1, 2, 3, 1980.00, 'EGP', 6),
+(32, 2, 1, 1, 2, 3, 1980.00, 'EGP', 7),
+(33, 2, 1, 1, 2, 3, 1980.00, 'EGP', 8),
+(34, 2, 1, 1, 2, 3, 1980.00, 'EGP', 9),
+(35, 2, 1, 1, 2, 3, 1980.00, 'EGP', 10),
+(36, 2, 1, 1, 3, 3, 3150.00, 'EGP', 11),
+(37, 2, 1, 1, 3, 3, 3150.00, 'EGP', 12),
+(38, 2, 1, 1, 3, 3, 3150.00, 'EGP', 13),
+(39, 2, 1, 1, 3, 3, 3150.00, 'EGP', 14),
+(40, 2, 1, 1, 3, 3, 3150.00, 'EGP', 15),
+(41, 2, 1, 1, 4, 3, 4500.00, 'EGP', 16),
+(42, 2, 1, 1, 4, 3, 4500.00, 'EGP', 17),
+(43, 2, 1, 1, 4, 3, 4500.00, 'EGP', 18),
+(44, 2, 1, 1, 4, 3, 4500.00, 'EGP', 19),
+(45, 2, 1, 1, 4, 3, 4500.00, 'EGP', 20),
+(46, 2, 1, 1, 5, 3, 6750.00, 'EGP', 21),
+(47, 2, 1, 1, 5, 3, 6750.00, 'EGP', 22),
+(48, 2, 1, 1, 5, 3, 6750.00, 'EGP', 23),
+(49, 2, 1, 1, 5, 3, 6750.00, 'EGP', 24),
+(50, 2, 1, 1, 5, 3, 6750.00, 'EGP', 25)
 ON CONFLICT (guest_night_price_id) DO UPDATE SET price_per_person_per_night=EXCLUDED.price_per_person_per_night;
 
 SELECT setval(pg_get_serial_sequence('guest_night_prices', 'guest_night_price_id'), COALESCE((SELECT MAX(guest_night_price_id) FROM guest_night_prices), 1));
@@ -967,7 +1005,7 @@ BEGIN
         ROUND(COALESCE(SUM(gross_amount), 0), 2) AS gross_revenue,
         ROUND(COALESCE(SUM(discount_amount), 0), 2) AS total_discounts,
         ROUND(COALESCE(SUM(net_amount), 0), 2) AS net_revenue,
-        ROUND(COALESCE(SUM(net_amount) / NULLIF(COUNT(DISTINCT reservation_id), 0), 0), 2) AS adr
+        ROUND(COALESCE(SUM(net_amount) / NULLIF(COUNT(DISTINCT reservation_id), 0), 0), 2) AS aov
     FROM view_hotel_sales_summary
     WHERE EXTRACT(YEAR FROM reservation_month) = target_year
     GROUP BY reservation_month
