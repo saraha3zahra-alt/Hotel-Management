@@ -821,7 +821,7 @@ SELECT
     ((r.reservation_id % 3) + 1) AS payment_method_id,
     r.final_amount AS amount,
     r.created_at AS payment_date,
-    'COMPLETED' AS status
+    'SUCCESSFUL' AS status
 FROM reservations r
 WHERE r.status_id IN (2, 3, 4)
 ON CONFLICT (payment_id) DO UPDATE SET amount=EXCLUDED.amount, status=EXCLUDED.status;
