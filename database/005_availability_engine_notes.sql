@@ -1,0 +1,14 @@
+-- Phase 5 - Availability Engine + Room Blocks
+-- No new tables are required.
+-- Phase 1 already contains:
+--   room_blocks / room_block_reasons
+--   reservations / reservation_rooms / reservation_statuses
+--   indexes for room/date searches
+--   DB guards preventing double booking and block/reservation overlap
+--
+-- Availability API considers a room unavailable when:
+-- 1) it has an overlapping reservation whose status blocks_inventory = true, OR
+-- 2) it has an overlapping room_block.
+--
+-- Date overlap uses hotel convention [check-in, check-out):
+-- existing_start < requested_checkout AND existing_end > requested_checkin.

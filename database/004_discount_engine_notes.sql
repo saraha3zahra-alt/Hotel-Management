@@ -1,0 +1,16 @@
+-- Phase 4 - Discount Engine
+-- Phase 1 already created promotions, promotion_tiers, promotion_room_types,
+-- promotion_age_categories and the promotion foreign keys on reservation_rooms.
+-- Therefore no new tables are required in Phase 4.
+--
+-- Discount selection implemented in ASP.NET Core:
+-- 1) room-level scope
+-- 2) promotion must be active and valid for the full ReservationRoom stay
+-- 3) optional room-type targeting
+-- 4) tier is selected by number of nights
+-- 5) highest promotion priority wins; ties use the larger calculated discount
+-- 6) PERCENTAGE and FIXED_AMOUNT are supported
+-- 7) discount can never reduce the room total below zero
+--
+-- can_combine is stored for future stacking rules. Phase 4 deliberately applies
+-- ONE promotion only to keep the calculation deterministic and auditable.

@@ -1,0 +1,19 @@
+# Node / Frontend
+node_modules/
+dist/
+.env
+.env.local
+
+# .NET / C# Backend
+bin/
+obj/
+publish/
+*.user
+*.suo
+.vs/
+.idea/
+.vscode/
+
+# OS / Misc
+Thumbs.db
+Desktop.ini

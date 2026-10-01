@@ -1,0 +1,1 @@
+import {Typography,Paper} from '@mui/material'; export default function Placeholder({title}:{title:string}){return <><Typography variant="h4" fontWeight={700} gutterBottom>{title}</Typography><Paper sx={{p:4}}><Typography color="text.secondary">The page shell is ready. API-connected CRUD screens will be implemented next from the Phase 8 endpoints.</Typography></Paper></>}
