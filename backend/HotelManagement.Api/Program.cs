@@ -16,7 +16,7 @@ builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IFinanceService, FinanceService>();
-builder.Services.AddCors(o=>o.AddPolicy("web",p=>p.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173")));
+builder.Services.AddCors(o=>o.AddPolicy("web",p=>p.SetIsOriginAllowed(_=>true).AllowAnyHeader().AllowAnyMethod()));
 var app=builder.Build(); app.UseSwagger(); app.UseSwaggerUI(); app.UseCors("web");
 app.MapControllers();
 app.MapGet("/health",()=>Results.Ok(new{status="ok"}));
