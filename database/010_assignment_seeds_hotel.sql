@@ -5,9 +5,9 @@
 -- ===========================================================================
 
 
--- Disable triggers during bulk seed population
-ALTER TABLE reservation_rooms DISABLE TRIGGER ALL;
-ALTER TABLE reservations DISABLE TRIGGER ALL;
+-- Disable USER triggers during bulk seed population (cloud safe)
+ALTER TABLE reservation_rooms DISABLE TRIGGER USER;
+ALTER TABLE reservations DISABLE TRIGGER USER;
 
 
 -- 0. Baseline Prerequisites Setup
@@ -811,9 +811,9 @@ WHERE r.status_id IN (2, 3, 4)
 ON CONFLICT DO NOTHING;
 
 
--- Re-enable triggers after bulk seed population
-ALTER TABLE reservation_rooms ENABLE TRIGGER ALL;
-ALTER TABLE reservations ENABLE TRIGGER ALL;
+-- Re-enable USER triggers after bulk seed population
+ALTER TABLE reservation_rooms ENABLE TRIGGER USER;
+ALTER TABLE reservations ENABLE TRIGGER USER;
 
 
 -- ===========================================================================
