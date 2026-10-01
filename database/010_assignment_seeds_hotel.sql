@@ -1,8 +1,8 @@
 -- ===========================================================================
 -- 010_assignment_seeds_hotel.sql
 -- Project: Majestic Hotel Sales & Reservation Analytics
--- Schema Verified: Exact matching with Production PostgreSQL Schema
--- Contains: Prerequisites, 50 Customers, 325 Reservations, Reservation Rooms, Payments & Expenses
+-- Schema Verified: Exact matching with Production PostgreSQL Schema & UI Screens
+-- Contains: Hotels, Buildings, Floors, Pricing Locations, Pricing Periods, Age Categories, Guest Night Prices, Promotions & Tiers, Customers, Reservations, Payments & Expenses
 -- ===========================================================================
 
 
@@ -14,8 +14,8 @@ DROP TRIGGER IF EXISTS trg_validate_reservation_activation ON reservations;
 
 -- 0. Baseline Prerequisites Setup
 INSERT INTO hotels (hotel_id, hotel_code, hotel_name, address, phone, email, currency_code, timezone, is_active) OVERRIDING SYSTEM VALUE VALUES
-(1, 'H001', 'فندق ماجيستك - Majestic Hotel', 'القاهرة - كورنيش النيل', '0227900000', 'info@majestichotel.com', 'EGP', 'Africa/Cairo', true)
-ON CONFLICT (hotel_id) DO UPDATE SET hotel_code=EXCLUDED.hotel_code, hotel_name=EXCLUDED.hotel_name;
+(1, 'H001', 'فندق ماجيستك - Majestic Hotel', 'القاهرة - كورنيش النيل', '01000000000', 'info@madarhotel.com', 'EGP', 'Africa/Cairo', true)
+ON CONFLICT (hotel_id) DO UPDATE SET hotel_code=EXCLUDED.hotel_code, hotel_name=EXCLUDED.hotel_name, phone=EXCLUDED.phone, email=EXCLUDED.email;
 
 INSERT INTO reservation_statuses (status_id, status_code, status_name, blocks_inventory) OVERRIDING SYSTEM VALUE VALUES
 (1, 'PENDING', 'قيد الانتظار', false),
@@ -26,17 +26,17 @@ INSERT INTO reservation_statuses (status_id, status_code, status_name, blocks_in
 (6, 'NO_SHOW', 'لم يحضر', false)
 ON CONFLICT (status_id) DO UPDATE SET status_code=EXCLUDED.status_code, status_name=EXCLUDED.status_name, blocks_inventory=EXCLUDED.blocks_inventory;
 
-INSERT INTO buildings (building_id, hotel_id, building_code, building_name) OVERRIDING SYSTEM VALUE VALUES
-(1, 1, 'MAIN', 'البرج الرئيسي')
-ON CONFLICT (building_id) DO NOTHING;
+INSERT INTO buildings (building_id, hotel_id, building_code, building_name, description) OVERRIDING SYSTEM VALUE VALUES
+(1, 1, 'b001', 'Build 1', 'البرج الرئيسي للفندق')
+ON CONFLICT (building_id) DO UPDATE SET building_code=EXCLUDED.building_code, building_name=EXCLUDED.building_name;
 
-INSERT INTO pricing_locations (pricing_location_id, location_code, location_name) OVERRIDING SYSTEM VALUE VALUES
-(1, 'STD', 'قياسي')
-ON CONFLICT (pricing_location_id) DO NOTHING;
+INSERT INTO pricing_locations (pricing_location_id, location_code, location_name, description) OVERRIDING SYSTEM VALUE VALUES
+(1, '1', 'ground', 'موقع التسعير الأرضي الرئيسية')
+ON CONFLICT (pricing_location_id) DO UPDATE SET location_code=EXCLUDED.location_code, location_name=EXCLUDED.location_name;
 
 INSERT INTO floors (floor_id, building_id, pricing_location_id, floor_code, floor_name, floor_number) OVERRIDING SYSTEM VALUE VALUES
-(1, 1, 1, 'F1', 'الطابق الأول', 1)
-ON CONFLICT (floor_id) DO NOTHING;
+(1, 1, 1, '0', 'ground', 1)
+ON CONFLICT (floor_id) DO UPDATE SET floor_code=EXCLUDED.floor_code, floor_name=EXCLUDED.floor_name, floor_number=EXCLUDED.floor_number;
 
 INSERT INTO room_types (room_type_id, room_type_code, room_type_name, max_occupancy, max_adults, max_children) OVERRIDING SYSTEM VALUE VALUES
 (1, 'STD_SINGLE', 'غرفة قياسية مفردة', 1, 1, 0),
@@ -59,7 +59,64 @@ INSERT INTO rooms (room_id, floor_id, room_type_id, operational_status_id, room_
 ON CONFLICT (room_id) DO UPDATE SET room_type_id=EXCLUDED.room_type_id, operational_status_id=EXCLUDED.operational_status_id;
 
 SELECT setval(pg_get_serial_sequence('hotels', 'hotel_id'), COALESCE((SELECT MAX(hotel_id) FROM hotels), 1));
+SELECT setval(pg_get_serial_sequence('buildings', 'building_id'), COALESCE((SELECT MAX(building_id) FROM buildings), 1));
+SELECT setval(pg_get_serial_sequence('pricing_locations', 'pricing_location_id'), COALESCE((SELECT MAX(pricing_location_id) FROM pricing_locations), 1));
+SELECT setval(pg_get_serial_sequence('floors', 'floor_id'), COALESCE((SELECT MAX(floor_id) FROM floors), 1));
 SELECT setval(pg_get_serial_sequence('rooms', 'room_id'), COALESCE((SELECT MAX(room_id) FROM rooms), 1));
+
+
+-- 0.1 Pricing Periods (فترات التسعير الموسمية)
+INSERT INTO pricing_periods (pricing_period_id, hotel_id, period_code, period_name, start_date, end_date, priority, is_active) OVERRIDING SYSTEM VALUE VALUES
+(1, 1, 'SUMMER_2026', 'الموسم الصيفي 2026', '2026-06-01', '2026-08-31', 1, true),
+(2, 1, 'AUTUMN_2026', 'الموسم الخريفي 2026', '2026-09-01', '2026-11-30', 2, true),
+(3, 1, 'PEAK_2026', 'موسم ذروة رأس السنة 2026', '2026-12-01', '2026-12-31', 3, true)
+ON CONFLICT (pricing_period_id) DO UPDATE SET period_code=EXCLUDED.period_code, period_name=EXCLUDED.period_name, start_date=EXCLUDED.start_date, end_date=EXCLUDED.end_date;
+
+SELECT setval(pg_get_serial_sequence('pricing_periods', 'pricing_period_id'), COALESCE((SELECT MAX(pricing_period_id) FROM pricing_periods), 1));
+
+-- 0.2 Age Categories (الفئات العمرية)
+INSERT INTO age_categories (age_category_id, hotel_id, category_code, category_name, min_age, max_age, sort_order, is_active) OVERRIDING SYSTEM VALUE VALUES
+(1, 1, 'INFANT', 'رضع (0-2 سنة)', 0, 2, 1, true),
+(2, 1, 'CHILD', 'أطفال (3-17 سنة)', 3, 17, 2, true),
+(3, 1, 'ADULT', 'بالغين (18+ سنة)', 18, NULL, 3, true)
+ON CONFLICT (age_category_id) DO UPDATE SET category_code=EXCLUDED.category_code, category_name=EXCLUDED.category_name, min_age=EXCLUDED.min_age, max_age=EXCLUDED.max_age;
+
+SELECT setval(pg_get_serial_sequence('age_categories', 'age_category_id'), COALESCE((SELECT MAX(age_category_id) FROM age_categories), 1));
+
+-- 0.3 Guest Night Prices (جدول أسعار الغرف لكل فئة عمرية وفترة)
+INSERT INTO guest_night_prices (guest_night_price_id, pricing_period_id, building_id, pricing_location_id, room_type_id, age_category_id, price_per_person_per_night, currency_code) OVERRIDING SYSTEM VALUE VALUES
+(1, 1, 1, 1, 1, 3, 1500.00, 'EGP'),
+(2, 1, 1, 1, 2, 3, 2200.00, 'EGP'),
+(3, 1, 1, 1, 2, 2, 1100.00, 'EGP'),
+(4, 1, 1, 1, 3, 3, 3500.00, 'EGP'),
+(5, 1, 1, 1, 3, 2, 1750.00, 'EGP'),
+(6, 1, 1, 1, 4, 3, 5000.00, 'EGP'),
+(7, 1, 1, 1, 5, 3, 7500.00, 'EGP'),
+(8, 2, 1, 1, 1, 3, 1400.00, 'EGP'),
+(9, 2, 1, 1, 2, 3, 2000.00, 'EGP'),
+(10, 2, 1, 1, 3, 3, 3200.00, 'EGP'),
+(11, 2, 1, 1, 4, 3, 4500.00, 'EGP'),
+(12, 2, 1, 1, 5, 3, 7000.00, 'EGP')
+ON CONFLICT (guest_night_price_id) DO UPDATE SET price_per_person_per_night=EXCLUDED.price_per_person_per_night;
+
+SELECT setval(pg_get_serial_sequence('guest_night_prices', 'guest_night_price_id'), COALESCE((SELECT MAX(guest_night_price_id) FROM guest_night_prices), 1));
+
+-- 0.4 Promotions & Promotion Tiers (العروض الترويجية والخصومات)
+INSERT INTO promotions (promotion_id, hotel_id, promotion_code, promotion_name, description, valid_from, valid_to, discount_scope, priority, can_combine, is_active) OVERRIDING SYSTEM VALUE VALUES
+(1, 1, 'SUMMER_OFFER_15', 'عرض الصيف الصيفي 15%', 'خصم 15% على جميع الغرف والأجنحة للحجوزات أكثر من ليلتين', '2026-06-01', '2026-08-31', 'ROOM', 1, false, true),
+(2, 1, 'LONG_STAY_20', 'خصم الإقامة الطويلة 20%', 'خصم 20% للحجوزات التي تتجاوز 5 ليالي', '2026-07-01', '2026-10-31', 'ROOM', 2, false, true),
+(3, 1, 'EARLY_BIRD_500', 'خصم الحجز المبكر 500 ج.م', 'خصم ثابت قدره 500 جنيه مصري عند الحجز قبل الموعد بـ 14 يوماً', '2026-06-01', '2026-12-31', 'ROOM', 3, false, true)
+ON CONFLICT (promotion_id) DO UPDATE SET promotion_code=EXCLUDED.promotion_code, promotion_name=EXCLUDED.promotion_name, valid_from=EXCLUDED.valid_from, valid_to=EXCLUDED.valid_to;
+
+SELECT setval(pg_get_serial_sequence('promotions', 'promotion_id'), COALESCE((SELECT MAX(promotion_id) FROM promotions), 1));
+
+INSERT INTO promotion_tiers (promotion_tier_id, promotion_id, min_nights, max_nights, discount_type, discount_value) OVERRIDING SYSTEM VALUE VALUES
+(1, 1, 2, NULL, 'PERCENTAGE', 15.00),
+(2, 2, 5, NULL, 'PERCENTAGE', 20.00),
+(3, 3, 1, NULL, 'FIXED_AMOUNT', 500.00)
+ON CONFLICT (promotion_tier_id) DO UPDATE SET discount_type=EXCLUDED.discount_type, discount_value=EXCLUDED.discount_value;
+
+SELECT setval(pg_get_serial_sequence('promotion_tiers', 'promotion_tier_id'), COALESCE((SELECT MAX(promotion_tier_id) FROM promotion_tiers), 1));
 
 -- 1. Insert 50 Customers with explicit customer_id
 
