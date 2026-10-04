@@ -1,16 +1,15 @@
 -- ===========================================================================
 -- 060_booking_quote_and_reservation_helper.sql
--- Real-time Booking Quote, Date Availability & Discount Calculator
--- Designed for n8n AI Agent customer reservation queries
+-- Real-time Booking Quote, Flexible Date Parsing & Availability Calculator
 -- ===========================================================================
 
--- Drop existing function first to allow return type schema change
 DROP FUNCTION IF EXISTS calculate_booking_quote_and_availability(date,date,integer,integer,text);
+DROP FUNCTION IF EXISTS calculate_booking_quote_and_availability(text,text,integer,integer,text);
 
--- Function: Calculate Real-time Booking Quote for Specific Dates & Guests Count
+-- Function: Calculate Real-time Booking Quote with Flexible Date Parsing
 CREATE OR REPLACE FUNCTION calculate_booking_quote_and_availability(
-    p_check_in DATE,
-    p_check_out DATE,
+    p_check_in_str TEXT,
+    p_check_out_str TEXT,
     p_adults INT DEFAULT 2,
     p_children INT DEFAULT 0,
     p_room_type_search TEXT DEFAULT NULL
@@ -30,9 +29,40 @@ RETURNS TABLE (
     final_net_total NUMERIC
 ) LANGUAGE plpgsql AS $$
 DECLARE
+    v_check_in DATE;
+    v_check_out DATE;
     v_nights INT;
 BEGIN
-    v_nights := GREATEST((p_check_out - p_check_in), 1);
+    -- Flexible Date Parsing for YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY, etc.
+    BEGIN
+        IF p_check_in_str ~ '^\d{4}-\d{2}-\d{2}' THEN
+            v_check_in := p_check_in_str::DATE;
+        ELSIF p_check_in_str ~ '^\d{2}-\d{2}-\d{4}' THEN
+            v_check_in := TO_DATE(p_check_in_str, 'DD-MM-YYYY');
+        ELSIF p_check_in_str ~ '^\d{2}/\d{2}/\d{4}' THEN
+            v_check_in := TO_DATE(p_check_in_str, 'DD/MM/YYYY');
+        ELSE
+            v_check_in := p_check_in_str::DATE;
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        v_check_in := CURRENT_DATE;
+    END;
+
+    BEGIN
+        IF p_check_out_str ~ '^\d{4}-\d{2}-\d{2}' THEN
+            v_check_out := p_check_out_str::DATE;
+        ELSIF p_check_out_str ~ '^\d{2}-\d{2}-\d{4}' THEN
+            v_check_out := TO_DATE(p_check_out_str, 'DD-MM-YYYY');
+        ELSIF p_check_out_str ~ '^\d{2}/\d{2}/\d{4}' THEN
+            v_check_out := TO_DATE(p_check_out_str, 'DD/MM/YYYY');
+        ELSE
+            v_check_out := p_check_out_str::DATE;
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        v_check_out := (v_check_in + INTERVAL '1 day')::DATE;
+    END;
+
+    v_nights := GREATEST((v_check_out - v_check_in), 1);
 
     RETURN QUERY
     WITH room_base AS (
@@ -44,7 +74,7 @@ BEGIN
             rt.max_occupancy::INT AS m_occ,
             (COUNT(DISTINCT rm.room_id) - COUNT(DISTINCT rr.room_id) FILTER (
                 WHERE r.status_id IN (2, 3) 
-                AND (rr.check_in_date < p_check_out AND rr.check_out_date > p_check_in)
+                AND (rr.check_in_date < v_check_out AND rr.check_out_date > v_check_in)
             ))::BIGINT AS avail_rooms,
             ROUND(COALESCE(AVG(gnp.price_per_person_per_night), 1500), 2) AS adult_rate
         FROM room_types rt
