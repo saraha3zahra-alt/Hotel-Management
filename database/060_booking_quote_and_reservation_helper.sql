@@ -4,6 +4,9 @@
 -- Designed for n8n AI Agent customer reservation queries
 -- ===========================================================================
 
+-- Drop existing function first to allow return type schema change
+DROP FUNCTION IF EXISTS calculate_booking_quote_and_availability(date,date,integer,integer,text);
+
 -- Function: Calculate Real-time Booking Quote for Specific Dates & Guests Count
 CREATE OR REPLACE FUNCTION calculate_booking_quote_and_availability(
     p_check_in DATE,
