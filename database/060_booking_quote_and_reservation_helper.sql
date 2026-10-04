@@ -66,8 +66,8 @@ BEGIN
             (rb.adult_rate * p_adults + (rb.adult_rate * 0.5) * p_children) AS nightly_rate,
             ((rb.adult_rate * p_adults + (rb.adult_rate * 0.5) * p_children) * v_nights) AS gross_total,
             CASE 
-                WHEN v_nights >= 5 THEN ' خصم الإقامة الطويلة (20%)'
-                WHEN v_nights >= 2 THEN ' عرض الصيف الصيفي (15%)'
+                WHEN v_nights >= 5 THEN 'خصم الإقامة الطويلة (20%)'
+                WHEN v_nights >= 2 THEN 'عرض الصيف الصيفي (15%)'
                 ELSE 'لا يوجد خصم متاح'
             END AS promo_name,
             CASE 
@@ -91,6 +91,6 @@ BEGIN
         ROUND(q.disc_val, 2) AS discount_amount,
         ROUND(q.gross_total - q.disc_val, 2) AS final_net_total
     FROM quote_calc q
-    ORDER BY q.final_net_total ASC;
+    ORDER BY (q.gross_total - q.disc_val) ASC;
 END;
 $$;
