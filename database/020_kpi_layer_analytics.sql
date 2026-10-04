@@ -25,14 +25,14 @@ SELECT
     r.gross_amount,
     r.discount_amount,
     r.final_amount AS net_amount,
-    COALESCE((SELECT SUM(p.amount) FROM payments p WHERE p.reservation_id = r.reservation_id AND p.payment_status = 'COMPLETED'), 0) AS total_paid,
-    COALESCE((SELECT SUM(ref.amount) FROM refunds ref WHERE ref.reservation_id = r.reservation_id AND ref.refund_status = 'COMPLETED'), 0) AS total_refunded
+    COALESCE((SELECT SUM(p.amount) FROM payments p WHERE p.reservation_id = r.reservation_id AND p.status IN ('SUCCESSFUL', 'COMPLETED')), 0) AS total_paid,
+    COALESCE((SELECT SUM(ref.refund_amount) FROM refunds ref WHERE ref.reservation_id = r.reservation_id AND ref.status IN ('APPROVED', 'COMPLETED')), 0) AS total_refunded
 FROM reservations r
 JOIN customers c ON r.customer_id = c.customer_id
 JOIN reservation_statuses s ON r.status_id = s.status_id;
 
 
--- 2. Function: Overall Hotel Executive Dashboard KPIs (Date Range Filterable)
+-- 2. Function: Overall Hotel Executive Dashboard KPIs
 CREATE OR REPLACE FUNCTION get_hotel_executive_kpis(
     p_start_date DATE DEFAULT '2026-06-01',
     p_end_date DATE DEFAULT '2026-11-30'
@@ -56,7 +56,7 @@ RETURNS TABLE (
     alos NUMERIC
 ) LANGUAGE plpgsql AS $$
 DECLARE
-    v_total_rooms INT := 75; -- Total hotel capacity
+    v_total_rooms INT := 75;
     v_total_days INT;
     v_available_room_nights BIGINT;
     v_occupied_nights BIGINT;
@@ -72,7 +72,6 @@ BEGIN
     v_total_days := GREATEST((p_end_date - p_start_date + 1), 1);
     v_available_room_nights := v_total_rooms * v_total_days;
 
-    -- Reservations metrics
     SELECT 
         COUNT(*),
         COUNT(*) FILTER (WHERE status_code IN ('CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT')),
@@ -92,11 +91,10 @@ BEGIN
     FROM view_reservation_analytics
     WHERE check_in_date >= p_start_date AND check_in_date <= p_end_date;
 
-    -- Total expenses
     SELECT COALESCE(SUM(amount), 0)
     INTO v_total_exp
     FROM expenses
-    WHERE expense_date >= p_start_date AND expense_date <= p_end_date AND payment_status = 'POSTED';
+    WHERE expense_date >= p_start_date AND expense_date <= p_end_date AND status = 'POSTED';
 
     v_profit := v_net_rev - v_total_exp;
 
@@ -121,7 +119,7 @@ END;
 $$;
 
 
--- 3. Function: Monthly P&L and Operational Performance Summary
+-- 3. Function: Monthly P&L Summary
 CREATE OR REPLACE FUNCTION get_monthly_pnl_summary(p_year INT DEFAULT 2026)
 RETURNS TABLE (
     month_code TEXT,
@@ -170,7 +168,7 @@ BEGIN
             DATE_TRUNC('month', expense_date)::DATE AS m_date,
             SUM(amount) AS exp_val
         FROM expenses
-        WHERE EXTRACT(YEAR FROM expense_date) = p_year AND payment_status = 'POSTED'
+        WHERE EXTRACT(YEAR FROM expense_date) = p_year AND status = 'POSTED'
         GROUP BY DATE_TRUNC('month', expense_date)::DATE
     )
     SELECT 
@@ -194,7 +192,7 @@ END;
 $$;
 
 
--- 4. Function: Building-by-Building Performance Analysis
+-- 4. Function: Building Performance Summary
 CREATE OR REPLACE FUNCTION get_building_performance_summary(
     p_start_date DATE DEFAULT '2026-06-01',
     p_end_date DATE DEFAULT '2026-11-30'
@@ -240,7 +238,7 @@ END;
 $$;
 
 
--- 5. Function: Room Type Revenue & Occupancy Analysis
+-- 5. Function: Room Type Performance Summary
 CREATE OR REPLACE FUNCTION get_room_type_performance_summary(
     p_start_date DATE DEFAULT '2026-06-01',
     p_end_date DATE DEFAULT '2026-11-30'
