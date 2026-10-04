@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION calculate_booking_quote_and_availability(
     p_room_type_search TEXT DEFAULT NULL
 )
 RETURNS TABLE (
-    room_type_id INT,
+    room_type_id BIGINT,
     room_type_name TEXT,
     max_adults INT,
     max_children INT,
@@ -34,15 +34,15 @@ BEGIN
     RETURN QUERY
     WITH room_base AS (
         SELECT 
-            rt.room_type_id,
+            rt.room_type_id::BIGINT AS r_type_id,
             rt.room_type_name::TEXT AS r_name,
-            rt.max_adults AS m_adults,
-            rt.max_children AS m_children,
-            rt.max_occupancy AS m_occ,
-            COUNT(DISTINCT rm.room_id) - COUNT(DISTINCT rr.room_id) FILTER (
+            rt.max_adults::INT AS m_adults,
+            rt.max_children::INT AS m_children,
+            rt.max_occupancy::INT AS m_occ,
+            (COUNT(DISTINCT rm.room_id) - COUNT(DISTINCT rr.room_id) FILTER (
                 WHERE r.status_id IN (2, 3) 
                 AND (rr.check_in_date < p_check_out AND rr.check_out_date > p_check_in)
-            ) AS avail_rooms,
+            ))::BIGINT AS avail_rooms,
             ROUND(COALESCE(AVG(gnp.price_per_person_per_night), 1500), 2) AS adult_rate
         FROM room_types rt
         JOIN rooms rm ON rt.room_type_id = rm.room_type_id
@@ -57,7 +57,7 @@ BEGIN
     ),
     quote_calc AS (
         SELECT 
-            rb.room_type_id,
+            rb.r_type_id,
             rb.r_name,
             rb.m_adults,
             rb.m_children,
@@ -78,18 +78,18 @@ BEGIN
         FROM room_base rb
     )
     SELECT 
-        q.room_type_id,
-        q.r_name AS room_type_name,
-        q.m_adults AS max_adults,
-        q.m_children AS max_children,
-        q.m_occ AS max_occupancy,
-        v_nights AS nights_count,
-        q.avail_rooms AS available_rooms_count,
-        ROUND(q.nightly_rate, 2) AS price_per_night,
-        ROUND(q.gross_total, 2) AS gross_stay_total,
-        q.promo_name AS applied_promotion,
-        ROUND(q.disc_val, 2) AS discount_amount,
-        ROUND(q.gross_total - q.disc_val, 2) AS final_net_total
+        q.r_type_id::BIGINT AS room_type_id,
+        q.r_name::TEXT AS room_type_name,
+        q.m_adults::INT AS max_adults,
+        q.m_children::INT AS max_children,
+        q.m_occ::INT AS max_occupancy,
+        v_nights::INT AS nights_count,
+        q.avail_rooms::BIGINT AS available_rooms_count,
+        ROUND(q.nightly_rate, 2)::NUMERIC AS price_per_night,
+        ROUND(q.gross_total, 2)::NUMERIC AS gross_stay_total,
+        q.promo_name::TEXT AS applied_promotion,
+        ROUND(q.disc_val, 2)::NUMERIC AS discount_amount,
+        ROUND(q.gross_total - q.disc_val, 2)::NUMERIC AS final_net_total
     FROM quote_calc q
     ORDER BY (q.gross_total - q.disc_val) ASC;
 END;
