@@ -3,290 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Majestic Hotel - AI Chatbot Widget</title>
-    <!-- FontAwesome icons -->
+    <title>فندق ماجيستك - المساعد الذكي</title>
+    <!-- 🤖 كود شات بوت فندق ماجيستك العائم -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #1e3a8a;
-            --accent-color: #d97706;
-            --bg-color: #f8fafc;
-            --text-color: #0f172a;
-        }
-
-        /* Floating Chat Button */
         .chatbot-toggler {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            width: 60px;
-            height: 60px;
-            background: var(--primary-color);
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(30, 58, 138, 0.4);
-            border: none;
-            z-index: 9999;
-            transition: transform 0.3s ease, background 0.3s;
+            position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px;
+            background: #1e3a8a; color: #fff; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 10px 25px rgba(30, 58, 138, 0.4); border: none; z-index: 9999;
+            transition: transform 0.3s ease;
         }
+        .chatbot-toggler:hover { transform: scale(1.08); background: #1e40af; }
+        .chatbot-toggler i { font-size: 26px; }
 
-        .chatbot-toggler:hover {
-            transform: scale(1.08);
-            background: #1e40af;
-        }
-
-        .chatbot-toggler i {
-            font-size: 26px;
-        }
-
-        /* Chat Window */
         .chatbot-container {
-            position: fixed;
-            bottom: 100px;
-            left: 30px;
-            width: 380px;
-            max-width: calc(100vw - 40px);
-            height: 540px;
-            max-height: calc(100vh - 120px);
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            z-index: 9998;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(20px) scale(0.95);
-            transition: all 0.3s ease;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: fixed; bottom: 100px; left: 30px; width: 380px; max-width: calc(100vw - 40px);
+            height: 520px; max-height: calc(100vh - 120px); background: #ffffff;
+            border-radius: 16px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            display: flex; flex-direction: column; overflow: hidden; z-index: 9998;
+            opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, sans-serif; direction: rtl;
         }
+        .chatbot-container.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
 
-        .chatbot-container.active {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0) scale(1);
-        }
+        .chat-header { background: linear-gradient(135deg, #1e3a8a, #1d4ed8); color: #fff; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+        .chat-header h4 { margin: 0; font-size: 16px; }
+        .chat-header p { margin: 2px 0 0; font-size: 12px; opacity: 0.85; }
+        .close-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
 
-        /* Header */
-        .chat-header {
-            background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
-            color: #ffffff;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+        .chat-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; }
+        .message { display: flex; max-width: 85%; }
+        .message.user { align-self: flex-start; }
+        .message.bot { align-self: flex-end; }
+        .message-content { padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+        .message.user .message-content { background: #1e3a8a; color: #fff; }
+        .message.bot .message-content { background: #fff; color: #0f172a; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 
-        .chat-header-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .suggestion-chips { display: flex; gap: 8px; padding: 10px 15px; overflow-x: auto; background: #fff; border-top: 1px solid #e2e8f0; }
+        .chip { background: #eff6ff; color: #1e3a8a; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; white-space: nowrap; }
 
-        .chat-header-info img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #fff;
-            padding: 2px;
-        }
-
-        .chat-header-info h4 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .chat-header-info p {
-            margin: 2px 0 0 0;
-            font-size: 12px;
-            opacity: 0.85;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-
-        .close-btn:hover {
-            opacity: 1;
-        }
-
-        /* Messages Box */
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            background: #f8fafc;
-        }
-
-        .message {
-            display: flex;
-            gap: 10px;
-            max-width: 85%;
-        }
-
-        .message.user {
-            align-self: flex-start; /* RTL: left */
-            flex-direction: row-reverse;
-            margin-right: auto;
-        }
-
-        .message.bot {
-            align-self: flex-end; /* RTL: right */
-            margin-left: auto;
-        }
-
-        .message-content {
-            padding: 12px 16px;
-            border-radius: 14px;
-            font-size: 14px;
-            line-height: 1.5;
-            white-space: pre-wrap;
-        }
-
-        .message.user .message-content {
-            background: var(--primary-color);
-            color: #ffffff;
-            border-bottom-right-radius: 2px;
-        }
-
-        .message.bot .message-content {
-            background: #ffffff;
-            color: var(--text-color);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            border-bottom-left-radius: 2px;
-        }
-
-        /* Quick Suggestion Chips */
-        .suggestion-chips {
-            display: flex;
-            gap: 8px;
-            padding: 10px 15px;
-            overflow-x: auto;
-            background: #fff;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .chip {
-            background: #eff6ff;
-            color: var(--primary-color);
-            border: 1px solid #bfdbfe;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: background 0.2s;
-        }
-
-        .chip:hover {
-            background: #dbeafe;
-        }
-
-        /* Input Footer */
-        .chat-input-container {
-            padding: 14px;
-            background: #ffffff;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .chat-input {
-            flex: 1;
-            border: 1px solid #cbd5e1;
-            padding: 10px 14px;
-            border-radius: 24px;
-            font-size: 14px;
-            outline: none;
-            direction: rtl;
-            transition: border-color 0.2s;
-        }
-
-        .chat-input:focus {
-            border-color: var(--primary-color);
-        }
-
-        .send-btn {
-            background: var(--primary-color);
-            color: #fff;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .send-btn:hover {
-            background: #1e40af;
-        }
+        .chat-input-container { padding: 12px; background: #fff; border-top: 1px solid #e2e8f0; display: flex; gap: 8px; }
+        .chat-input { flex: 1; border: 1px solid #cbd5e1; padding: 10px 14px; border-radius: 24px; font-size: 14px; outline: none; direction: rtl; }
+        .send-btn { background: #1e3a8a; color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <!-- Floating Trigger Button -->
-    <button class="chatbot-toggler" id="chatbotToggler">
-        <i class="fa-solid fa-comments"></i>
-    </button>
+    <button class="chatbot-toggler" id="chatbotToggler"><i class="fa-solid fa-comments"></i></button>
 
-    <!-- Chat Widget Container -->
     <div class="chatbot-container" id="chatbotContainer">
-        <!-- Header -->
         <div class="chat-header">
-            <div class="chat-header-info">
-                <i class="fa-solid fa-hotel" style="font-size: 24px;"></i>
-                <div>
-                    <h4>فندق ماجيستك - المساعد الذكي</h4>
-                    <p>متصل الآن لخدمتك 24/7</p>
-                </div>
+            <div>
+                <h4>🏨 فندق ماجيستك - المساعد الذكي</h4>
+                <p>متصل الآن لخدمتك 24/7</p>
             </div>
             <button class="close-btn" id="closeBtn">&times;</button>
         </div>
-
-        <!-- Chat Messages -->
         <div class="chat-messages" id="chatMessages">
             <div class="message bot">
                 <div class="message-content">أهلاً بك في فندق ماجيستك! 🏨
-كيف يمكنني مساعدتك اليوم في استفسارات الغرف، الأسعار، أو إتمام حجز جديد؟</div>
+كيف يمكنني مساعدتك اليوم في استفسارات الغرف والأسعار والإحصائيات؟</div>
             </div>
         </div>
-
-        <!-- Quick Chips -->
         <div class="suggestion-chips">
             <button class="chip" onclick="sendQuickMessage('ما هي الغرف المتاحة حالياً؟')">الغرف المتاحة</button>
-            <button class="chip" onclick="sendQuickMessage('حساب حجز 2 كبار و 2 أطفال')">حجز عائلي</button>
-            <button class="chip" onclick="sendQuickMessage('ما هي العروض والخصومات الفعالة؟')">العروض والخصومات</button>
+            <button class="chip" onclick="sendQuickMessage('حساب حجز 2 كبار و 2 أطفال من 2026-10-10 إلى 2026-10-20')">حجز عائلي</button>
         </div>
-
-        <!-- Input Box -->
         <div class="chat-input-container">
-            <input type="text" class="chat-input" id="chatInput" placeholder="اكتب سؤالك هنا..." onkeydown="if(event.key === 'Enter') sendMessage()">
+            <input type="text" class="chat-input" id="chatInput" placeholder="اكتب سؤالك هنا..." onkeydown="if(event.key==='Enter') sendMessage()">
             <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
 
     <script>
-        // 🛑 ضع رابط n8n Webhook URL الخاص بك هنا:
-        const N8N_WEBHOOK_URL = 'https://YOUR_N8N_INSTANCE_URL/webhook/YOUR_CHAT_WEBHOOK_PATH';
+        // 🔗 رابط الـ n8n Webhook الخاص بك المربوط مباشرةً:
+        const N8N_WEBHOOK_URL = 'https://sarahhassan22.app.n8n.cloud/webhook/0d87b81b-46b0-4f68-9731-63f454648888/chat';
 
         const toggler = document.getElementById('chatbotToggler');
         const container = document.getElementById('chatbotContainer');
@@ -314,9 +106,7 @@
 
             appendMessage('user', text);
             inputField.value = '';
-
-            // Loading indicator
-            appendMessage('bot', 'جاري التفكير وحساب الإجابة...');
+            appendMessage('bot', 'جاري التواصل وحساب التوافر والأسعار...');
             const loadingMsg = messagesBox.lastElementChild;
 
             try {
@@ -325,15 +115,13 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chatInput: text, action: 'sendMessage' })
                 });
-                
                 const data = await response.json();
                 loadingMsg.remove();
-
-                const replyText = data.output || data.text || data.response || 'تم استقبال طلبك بنجاح!';
-                appendMessage('bot', replyText);
+                const reply = data.output || data.text || data.response || 'تم الاستعلام بنجاح!';
+                appendMessage('bot', reply);
             } catch (err) {
                 loadingMsg.remove();
-                appendMessage('bot', 'شكراً لتواصلك! أهلاً بك في فندق ماجيستك، تسعدنا خدمتك دائماً.');
+                appendMessage('bot', 'أهلاً بك في فندق ماجيستك، تسعدنا خدمتك دائماً!');
             }
         }
 
@@ -342,6 +130,5 @@
             sendMessage();
         }
     </script>
-
 </body>
 </html>
