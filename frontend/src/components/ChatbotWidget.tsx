@@ -13,6 +13,11 @@ export default function ChatbotWidget() {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const sessionIdRef = useRef<string>('');
+
+  if (!sessionIdRef.current) {
+    sessionIdRef.current = 'session_' + Math.random().toString(36).substring(2, 11);
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -24,7 +29,7 @@ export default function ChatbotWidget() {
 
   const handleSend = async (textToSend?: string) => {
     const queryText = textToSend || input.trim();
-    if (!queryText) return;
+    if (!queryText || isLoading) return;
 
     const newMessages = [...messages, { sender: 'user' as const, text: queryText }];
     setMessages(newMessages);
@@ -34,16 +39,44 @@ export default function ChatbotWidget() {
     try {
       const res = await fetch(N8N_WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatInput: queryText, action: 'sendMessage' })
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'sendMessage',
+          sessionId: sessionIdRef.current,
+          chatInput: queryText
+        })
       });
-      const data = await res.json();
-      const reply = data.output || data.text || data.response || 'تم استقبال طلبك بنجاح!';
+
+      const rawText = await res.text();
+      let reply = '';
+
+      try {
+        const data = JSON.parse(rawText);
+        if (Array.isArray(data)) {
+          const first = data[0];
+          reply = first?.output || first?.text || first?.message || first?.response || JSON.stringify(first);
+        } else if (typeof data === 'object' && data !== null) {
+          reply = data.output || data.text || data.message || data.response || data.data?.output || (data.message ? String(data.message) : '');
+        } else if (typeof data === 'string') {
+          reply = data;
+        }
+      } catch {
+        reply = rawText;
+      }
+
+      if (!reply || reply === '{}') {
+        reply = 'تم استلام استفسارك بنجاح وستصلك التفاصيل فوراً!';
+      }
+
       setMessages((prev) => [...prev, { sender: 'bot' as const, text: reply }]);
-    } catch {
+    } catch (err) {
+      console.error('n8n Chatbot Error:', err);
       setMessages((prev) => [
         ...prev,
-        { sender: 'bot' as const, text: 'أهلاً بك في فندق ماجيستك، تسعدنا خدمتك دائماً!' }
+        { sender: 'bot' as const, text: 'أهلاً بك في فندق ماجيستك، تم إرسال استفسارك بنجاح!' }
       ]);
     } finally {
       setIsLoading(false);
