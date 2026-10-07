@@ -14,7 +14,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import StarIcon from '@mui/icons-material/Star';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useHotel } from '../hotelContext';
-import { useAuth } from '../authContext';
+import ChatbotWidget from './ChatbotWidget';
 
 const items = [
   ['/', 'لوحة التحكم الرئيسيّة', DashboardIcon],
@@ -167,6 +167,7 @@ export default function Layout() {
       <Box component="main" sx={{ flex: 1, minWidth: 0, p: 3, pt: 11, transition: 'margin .2s' }}>
         <Outlet />
       </Box>
+      <ChatbotWidget />
     </Box>
   );
 }
