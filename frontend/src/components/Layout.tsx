@@ -14,6 +14,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import StarIcon from '@mui/icons-material/Star';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useHotel } from '../hotelContext';
+import { useAuth } from '../authContext';
 import ChatbotWidget from './ChatbotWidget';
 
 const items = [
