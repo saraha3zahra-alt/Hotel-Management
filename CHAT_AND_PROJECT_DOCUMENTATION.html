@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Majestic Hotel Management - Project & Conversation Documentation</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            color: #1e293b;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            direction: rtl;
+        }
+        .header {
+            border-bottom: 3px solid #d97706;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        h1 {
+            color: #0f172a;
+            font-size: 24pt;
+            margin: 0 0 8px 0;
+        }
+        h2 {
+            color: #1e3a8a;
+            font-size: 16pt;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            page-break-after: avoid;
+        }
+        h3 {
+            color: #b45309;
+            font-size: 13pt;
+            margin-top: 15px;
+            page-break-after: avoid;
+        }
+        p, li {
+            font-size: 10.5pt;
+        }
+        .meta-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-right: 4px solid #d97706;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 10pt;
+        }
+        .meta-box a {
+            color: #1d4ed8;
+            text-decoration: none;
+            direction: ltr;
+            display: inline-block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 9.5pt;
+            page-break-inside: avoid;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 8px 10px;
+            text-align: right;
+        }
+        th {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        pre, code {
+            font-family: Consolas, 'Courier New', monospace;
+            direction: ltr;
+            text-align: left;
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+        pre {
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 9pt;
+            line-height: 1.4;
+            page-break-inside: avoid;
+        }
+        code {
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 9.5pt;
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        .badge {
+            display: inline-block;
+            background-color: #d97706;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 8.5pt;
+            font-weight: bold;
+        }
+        .badge-success {
+            background-color: #16a34a;
+        }
+        .footer {
+            margin-top: 40px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+            font-size: 8.5pt;
+            color: #64748b;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>نظام إدارة فنادق ماجيستك (Majestic Hotel Management System)</h1>
+        <div style="font-size: 13pt; color: #475569; font-weight: bold;">
+            التوثيق التقني الشامل وسجل المحادثة وتفاصيل النشر السحابي
+        </div>
+    </div>
+
+    <div class="meta-box">
+        <strong>🌐 روابط المشروع الحية:</strong><br>
+        • <strong>الموقع الرئيسي (Frontend Vercel):</strong> <a href="https://majestic-hotel-nu.vercel.app">https://majestic-hotel-nu.vercel.app</a><br>
+        • <strong>الباك إيند وتوثيق الـ API (MonsterASP.NET):</strong> <a href="https://hotel-management-api.runasp.net/swagger/index.html">https://hotel-management-api.runasp.net/swagger/index.html</a><br>
+        • <strong>مساعد الذكاء الاصطناعي (n8n Webhook):</strong> <a href="https://seera.app.n8n.cloud/webhook/0d87b81b-46b0-4f68-9731-63f454648888/chat">https://seera.app.n8n.cloud/webhook/0d87b81b-46b0-4f68-9731-63f454648888/chat</a><br>
+        • <strong>مستودع الكود (GitHub):</strong> <a href="https://github.com/saraha3zahra-alt/Hotel-Management">https://github.com/saraha3zahra-alt/Hotel-Management</a><br>
+        • <strong>الإصدار:</strong> <span class="badge badge-success">v2.4.0 Live Production</span> | التاريخ: أكتوبر 2026
+    </div>
+
+    <h2>1. نظرة عامة على المشروع (Executive Summary)</h2>
+    <p>
+        يعد نظام <strong>ماجيستك لإدارة الفنادق</strong> منصة سحابية شاملة مصممة لإدارة وتشغيل سلاسل الفنادق الفاخرة. يدمج النظام بين عمليات إدارة الغرف متعددة المباني، محرك التسعير الديناميكي والموسمي، دورة حياة الحجوزات، الدفاتر المالية وسجلات المصروفات، طبقات ذكاء الأعمال ومؤشرات الأداء الرئيسية (KPIs)، بالإضافة إلى مساعد ذكي باللغة العربية (n8n AI Concierge) يعمل على مدار الساعة.
+    </p>
+
+    <h2>2. المكونات التقنية والبنية التحتية السحابية</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>المكون</th>
+                <th>التقنيات المستخدمة</th>
+                <th>منصة الاستضافة</th>
+                <th>الحالة والرابط</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>واجهة المستخدم (Frontend)</strong></td>
+                <td>React 18, Vite, TypeScript, MUI, Emotion, RTL Cairo</td>
+                <td>Vercel Edge Network</td>
+                <td><span class="badge badge-success">Online</span> majestic-hotel-nu.vercel.app</td>
+            </tr>
+            <tr>
+                <td><strong>الباك إيند (Backend API)</strong></td>
+                <td>C# ASP.NET Core .NET 8, Clean Architecture, EF Core</td>
+                <td>MonsterASP.NET (IIS)</td>
+                <td><span class="badge badge-success">Online</span> hotel-management-api.runasp.net</td>
+            </tr>
+            <tr>
+                <td><strong>توثيق الـ API (Swagger)</strong></td>
+                <td>OpenAPI 3.0 / Swashbuckle</td>
+                <td>MonsterASP.NET</td>
+                <td><span class="badge badge-success">Online</span> /swagger/index.html</td>
+            </tr>
+            <tr>
+                <td><strong>قاعدة البيانات (Database)</strong></td>
+                <td>PostgreSQL 15, pgvector, Stored SQL Procedures</td>
+                <td>Supabase Cloud</td>
+                <td><span class="badge badge-success">Active</span> 3 Buildings, 75 Rooms, 2100 Bookings</td>
+            </tr>
+            <tr>
+                <td><strong>وكيل الذكاء الاصطناعي (AI Agent)</strong></td>
+                <td>n8n Cloud, LangChain, OpenAI GPT-4o, Postgres Memory</td>
+                <td>seera.app.n8n.cloud</td>
+                <td><span class="badge badge-success">Active</span> seera.app.n8n.cloud Webhook</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. بنية قاعدة البيانات وملفات الـ Seeds</h2>
+    <p>تم تصميم وتنفيذ نموذج بيانات موسع على Supabase يشمل:</p>
+    <ul>
+        <li><strong>المباني والغرف:</strong> 3 مبانٍ رئيسية (المبنى الرئيسي، جناح رويال، بيتش فيو) بإجمالي 75 غرفة مصنفة (ديلوكس، أجنحة عائلية، جناح ملكي بانورامي).</li>
+        <li><strong>العملاء والحجوزات:</strong> 530 عميل مسجل و2,100 حجز تاريخي ومستقبلي (2024-2026) مع تتبع كامل لدورة حياة الحجز والنزلاء المسجلين.</li>
+        <li><strong>محرك الأسعار والمواسم:</strong> تسعير ديناميكي حسب الفئات العمرية (كبار، مراهقين، أطفال، رضع) والمواسم (منخفض، معتدل، صيفي، ذروة الأعياد).</li>
+        <li><strong>الدفاتر المالية:</strong> سجلات المدفوعات، حركات الاسترداد، ومصروفات التشغيل (رواتب، صيانة، مرافق).</li>
+    </ul>
+
+    <h2>4. طبقات مؤشرات الأداء والتحليلات (KPI Analytics Layer)</h2>
+    <p>تتضمن قاعدة البيانات 5 طبقات تحليلية برمجية بالـ SQL:</p>
+    <ul>
+        <li><strong>الطبقة الأولى (Executive KPIs):</strong> حساب RevPAR (العائد لكل غرفة متاحة)، ADR (متوسط السعر اليومي)، نسب الإشغال، وقائمة الدخل والأرباح الشهرية (P&L).</li>
+        <li><strong>الطبقة الثانية (Customer & Channels):</strong> تحليل شرائح العملاء وفق نموذج RFM (العملاء الذهبيين، المترددين، المهددين بالفقدان) وتحليل قنوات الحجز (Booking.com، مباشر، إكسبيديا).</li>
+        <li><strong>الطبقة الثالثة (Predictive & Pricing):</strong> العائد على الحملات الترويجية، فترات الحجز المسبق (Lead Time)، ومرونة الأسعار الموسمية.</li>
+        <li><strong>الطبقة الرابعة (Inventory & Real-Time Quotes):</strong> دوال SQL لحساب عروض الأسعار والتوافر الفوري وفق تواريخ الإقامة وأعمار النزلاء.</li>
+    </ul>
+
+    <h2>5. تفاصيل نشر الباك إيند وحل مشكلات الخادم (MonsterASP.NET)</h2>
+    <p>
+        تم نشر مشروع الـ Web API على <strong>MonsterASP.NET</strong> كخيار مجاني 100% يدعم .NET 8 دون طلب بطاقة ائتمانية.
+    </p>
+    <h3>إعداد ملف web.config لدعم طلبات CORS:</h3>
+    <pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;configuration&gt;
+  &lt;location path="." inheritInChildApplications="false"&gt;
+    &lt;system.webServer&gt;
+      &lt;handlers&gt;
+        &lt;remove name="OPTIONSVerbHandler" /&gt;
+        &lt;add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" /&gt;
+      &lt;/handlers&gt;
+      &lt;aspNetCore processPath="dotnet" arguments=".\HotelManagement.Api.dll" stdoutLogEnabled="false" stdoutLogFile=".\logs\stdout" hostingModel="inprocess" /&gt;
+    &lt;/system.webServer&gt;
+  &lt;/location&gt;
+&lt;/configuration&gt;</code></pre>
+    <p>
+        إضافة <code>&lt;remove name="OPTIONSVerbHandler" /&gt;</code> منعت خادم IIS من حظر طلبات الـ Preflight (OPTIONS) القادمة من نطاق Vercel، مما حل مشكلة اتصال الواجهة الأمامية بالباك إيند بشكل نهائي.
+    </p>
+
+    <h2>6. تكامل شات بوت الذكاء الاصطناعي (n8n Concierge)</h2>
+    <p>
+        تم دمج ويدجت الشات التفاعلي <code>ChatbotWidget.tsx</code> في أسفل يسار الموقع، وربطه برابط الـ Webhook الجديد:
+        <br>
+        <code>https://seera.app.n8n.cloud/webhook/0d87b81b-46b0-4f68-9731-63f454648888/chat</code>
+    </p>
+    <ul>
+        <li><strong>إدارة الجلسات (Session Management):</strong> يقوم الكود بتوليد معرف جلسة فريد (<code>sessionId</code>) وحفظه لمنع تداخل المحادثات ودعم ذاكرة الـ Postgres في n8n.</li>
+        <li><strong>تحليل الردود الذكي:</strong> يدعم استقبال الردود النصية، كائنات الـ JSON، والمصفوفات التي يرجعها وكيل n8n.</li>
+    </ul>
+
+    <h2>7. سجل حل المشاكل الفنية (Troubleshooting Log)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>المشكلة</th>
+                <th>السبب الجذري</th>
+                <th>الحل المطبق</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>طلب بطاقة ائتمان على Render</td>
+                <td>يتطلب Render بطاقة بنكية للتحقق من حاويات Docker.</td>
+                <td>تم الانتقال إلى MonsterASP.NET (.NET 8 مجاني دون بطاقة).</td>
+            </tr>
+            <tr>
+                <td>خطأ 500 على خادم MonsterASP</td>
+                <td>الملفات كانت داخل wwwroot بدلاً من Home وweb.config مفقود.</td>
+                <td>نقل الملفات للـ Home وإنشاء web.config وربط Supabase.</td>
+            </tr>
+            <tr>
+                <td>حظر CORS Preflight</td>
+                <td>خادم IIS يعترض طلبات OPTIONS قبل وصولها لـ .NET Core.</td>
+                <td>إضافة remove OPTIONSVerbHandler في web.config.</td>
+            </tr>
+            <tr>
+                <td>شاشة بيضاء على Vercel</td>
+                <td>نقص import useAuth في Layout.tsx.</td>
+                <td>استعادة الـ import ودفع commit d168c43 لـ GitHub.</td>
+            </tr>
+            <tr>
+                <td>تحديث رابط الـ n8n Webhook</td>
+                <td>تحديث نطاق n8n إلى seera.app.n8n.cloud.</td>
+                <td>تحديث الكود ودفع commit 6691217 ونشره على Vercel.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Majestic Hotel Management System &copy; 2026. تم إعداد هذا التقرير وتوثيق المشروع آلياً.
+    </div>
+
+</body>
+</html>
