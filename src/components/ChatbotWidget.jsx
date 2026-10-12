@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const N8N_WEBHOOK_URL = 'https://YOUR_N8N_INSTANCE_URL/webhook/YOUR_CHAT_WEBHOOK_PATH';
+const N8N_WEBHOOK_URL = 'https://seera.app.n8n.cloud/webhook/0d87b81b-46b0-4f68-9731-63f454648888/chat';
 
 export default function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
